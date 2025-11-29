@@ -4,53 +4,54 @@ FastAPI GitReadme Application (OpenAI Version)
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 import logging
 import datetime
-import os
 
-from app import ReadmeGeneratorApp    # ✅ FIXED IMPORT
+# Your local imports
+from app import ReadmeGeneratorApp
 from api_helper import (
-    log_request_metrics, 
-    validate_github_url, 
+    log_request_metrics,
+    validate_github_url,
     sanitize_repo_name,
     format_error_response,
-    log_generation_attempt,
-    get_client_info,
-    check_rate_limit,
     metrics
 )
 
-templates = Jinja2Templates(directory="templates")
-
+# ------------------------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+# ------------------------------------------------------------------------------
+# FastAPI App
+# ------------------------------------------------------------------------------
 app = FastAPI(
     title="GitReadme - AI README Generator",
-    description="OpenAI-powered README generator",
     version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    docs_url="/docs",       # <-- IMPORTANT FIX
+    redoc_url="/redoc"
 )
 
+# ------------------------------------------------------------------------------
+# CORS
+# ------------------------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://gitreadme.vercel.app"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ------------------------------------------------------------------------------
+# Request/Response Models
+# ------------------------------------------------------------------------------
 class ReadmeRequest(BaseModel):
     repo_url: str
     generation_method: str = "Standard README"
@@ -63,31 +64,36 @@ class ReadmeResponse(BaseModel):
     repo_url: str
     generation_method: str
 
-
+# ------------------------------------------------------------------------------
+# Initialize AI App
+# ------------------------------------------------------------------------------
 try:
     readme_app = ReadmeGeneratorApp()
-    logger.info("GitReadme initialized successfully")
+    logger.info("GitReadme initialized successfully.")
 except Exception as e:
     logger.error(f"Initialization failed: {e}")
     readme_app = None
 
+# ------------------------------------------------------------------------------
+# HEALTH CHECK  ✔ REQUIRED FOR RENDER
+# ------------------------------------------------------------------------------
+@app.get("/health", response_class=PlainTextResponse)
+async def health():
+    return "OK"
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse(
-        "home_page.html",
-        {
-            "request": request,
-            "app_name": "GitReadme",
-            "app_version": "1.0.0",
-            "current_year": datetime.datetime.now().year
-        }
-    )
+# ------------------------------------------------------------------------------
+# ROOT ROUTE
+# ------------------------------------------------------------------------------
+@app.get("/", response_class=PlainTextResponse)
+async def root():
+    return "GitReadme Backend Running"
 
-
+# ------------------------------------------------------------------------------
+# README GENERATION ROUTE
+# ------------------------------------------------------------------------------
 @app.post("/generate-readme", response_model=ReadmeResponse)
 @log_request_metrics
-async def generate_readme(request: ReadmeRequest, http_request: Request):
+async def generate_readme(request: ReadmeRequest):
 
     if not validate_github_url(request.repo_url):
         raise HTTPException(400, "Invalid GitHub URL")
