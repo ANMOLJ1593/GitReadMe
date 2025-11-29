@@ -1,0 +1,32 @@
+# Environment files
+.env
+backend/.env
+gitreadme-frontend/.env.local
+
+# Python virtual environments
+venv/
+backend/venv/
+*.pyc
+__pycache__/
+
+# Repo clones (generated folders)
+backend/projects/
+backend/temp_repos/
+backend/cloned_repo/
+
+# Node & Next.js
+gitreadme-frontend/node_modules/
+gitreadme-frontend/.next/
+gitreadme-frontend/out/
+gitreadme-frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
