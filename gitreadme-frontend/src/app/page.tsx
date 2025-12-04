@@ -271,7 +271,7 @@ export default function HomePage() {
         {/* Footer */}
         <div className="text-center mt-16">
           <p className="text-sm text-stone-500">
-            Powered by OpenAI • Built with ❤️ for developers
+            Powered by Gemini • Built with ❤️ for developers
           </p>
         </div>
       </div>

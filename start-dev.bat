@@ -1,35 +1,40 @@
 @echo off
 echo ========================================
-echo   Starting GitReadme Project (Backend + Frontend)
+echo  🚀 Starting GitReadme (Gemini Version)
 echo ========================================
 
-REM Start Backend
-echo [Backend] Creating virtual environment...
-python -m venv venv
+REM --- 🔥 BACKEND SETUP ---
+IF NOT EXIST venv (
+    echo [Backend] Creating fresh virtual environment...
+    python -m venv venv
+)
 
-echo [Backend] Activating virtual environment...
+echo [Backend] Activating venv...
 call venv\Scripts\activate
 
-echo [Backend] Installing dependencies...
+echo [Backend] Installing Dependencies...
+pip install --upgrade pip
 cd backend
 pip install -r requirements.txt
 cd ..
 
-echo [Backend] Starting FastAPI server...
+echo [Backend] Starting FastAPI...
 start cmd /k "call venv\Scripts\activate && cd backend && uvicorn fastapi_app:app --reload"
 
-REM Start Frontend
-echo [Frontend] Installing dependencies...
+REM --- 🔥 FRONTEND SETUP ---
 cd gitreadme-frontend
-npm install
 
-echo [Frontend] Starting Next.js development server...
+IF NOT EXIST node_modules (
+    echo [Frontend] Installing dependencies...
+    npm install
+)
+
+echo [Frontend] Starting Next.js UI...
 start cmd /k "npm run dev"
-
 cd ..
+
 echo ========================================
-echo Both backend and frontend are now running.
-echo Backend:  http://localhost:8000
-echo Frontend: http://localhost:3000
+echo  Backend → http://localhost:8000/docs
+echo  Frontend → http://localhost:3000
 echo ========================================
 pause
